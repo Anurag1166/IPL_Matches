@@ -1,0 +1,37 @@
+set hive.cli.print.current.db=TRUE;
+
+create table matchdata (id int, year int,venue string,ddates timestamp,
+team1 string,team2 string,tosswon string, tosschoose string, result string, 
+dlapplied int, winner string,winbyruns int,winbywicket int,manofmatch string,
+ground string,umpire1 string,umpire2 string)
+row format delimited
+ fields terminated by ',';
+
+ load data local inpath'/home/hduser/Desktop/rcbmatches.csv' into table matchdata;
+
+Answer 1.   What is the average win_by_run of winning team ?
+SELECT AVG(winbyruns) from Matchdata;
+
+
+2. What is the win rate by every team ?
+SELECT winner as team , ((count(winner) / (SELECT count(*) from matchdata))*100) as total_rate_by_team FROM `matchdata` GROUP by winner;
+
+
+4. At which occasion the team won? Batting first or fielding first ?
+Answer=>Fielding
+
+Answer 3  which players won the man of the matches exactly 5 times ?
+select * from (select manofmatch as player, count(manofmatch) as manofmatch_count from matchdata group by manofmatch) t where manofmatch_count = 5;
+
+
+
+Answer 5.  In which ground the winning percentage is high ?
+SELECT ground, ((count(`ground`) / (SELECT count(*) FROM matchdata GROUP BY ground))*100) as high_rated_ground FROM `matchdata` GROUP by `ground` order by high_rated_ground desc limit 0,1;
+
+
+Answer 6.In how many matches AB de villiars won the man of the matches in Bangalore stadium when RCB won the matches ?
+SELECT COUNT(*) as total_won_match  FROM `matchdata` WHERE `manofmatch` LIKE 'AB de Villiers' and `venue` LIKE 'Bangalore' and winner = 'Royal Challengers Bangalore'
+
+Answer 7. How many matches virat kohli won the man of the matches while chasing ?
+SELECT count(*) as total_won_match  FROM `matchdata` WHERE `manofmatch` LIKE 'V Kohli' and winbywicket>0;
+													
